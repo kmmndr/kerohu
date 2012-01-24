@@ -1,0 +1,88 @@
+#!/bin/sh
+
+CURRENT_GIT_DIR=`pwd`
+APP_NAME=`basename $CURRENT_GIT_DIR .git`
+#APP_NAME="piktur_gallery"
+APP_PATH=$HOME/apps/${APP_NAME}
+RELEASES_APP_PATH=$HOME/${APP_NAME}/releases
+NOW=`date +%Y%m%d%H%M`
+RBENV_PATH=$HOME/.rbenv
+
+CURRENT_RELEASE_APP_PATH=$RELEASES_APP_PATH/$NOW
+CURRENT_APP_PATH=$HOME/${APP_NAME}/current
+SHARED_APP_PATH=$HOME/${APP_NAME}/shared
+
+
+# Production environment
+export RAILS_ENV="production"
+
+PID=$$
+echo "PID : $PID"
+renice -19 -p $$
+
+run_quietly() {
+  eval $1 || exit_with_error $1
+}
+
+run() {
+  echo "running : $1"
+  run_quietly "$1"
+}
+
+log() {
+  echo "-----> $*"
+}
+
+exit_with_error() {
+  log "An error has occurred, stopping\nInvoked command : $1"
+  exit 1
+}
+
+log "receiving push"
+run_quietly "mkdir -p ${CURRENT_RELEASE_APP_PATH}"
+run_quietly "GIT_WORK_TREE=$CURRENT_RELEASE_APP_PATH git checkout -f"
+
+log "Ruby/Rails app detected\n
+ Application name $APP_NAME"
+run_quietly "cd ${CURRENT_RELEASE_APP_PATH}"
+run_quietly "mkdir -p ${CURRENT_RELEASE_APP_PATH}/vendor/"
+run_quietly "mkdir -p ${SHARED_APP_PATH}/log/"
+run_quietly "mkdir -p ${SHARED_APP_PATH}/tmp/pids/"
+run_quietly "mkdir -p ${SHARED_APP_PATH}/bundle/"
+#ln -nfs ${SHARED_APP_PATH}/config/database.yml ${CURRENT_RELEASE_APP_PATH}/config/database.yml || exit_with_error
+run_quietly "rm -rf ${CURRENT_RELEASE_APP_PATH}/log"
+run_quietly "ln -nfs ${SHARED_APP_PATH}/log/ ${CURRENT_RELEASE_APP_PATH}/log"
+run_quietly "mkdir -p ${CURRENT_RELEASE_APP_PATH}/tmp/"
+run_quietly "ln -nfs ${SHARED_APP_PATH}/tmp/pids/ ${CURRENT_RELEASE_APP_PATH}/tmp/pids"
+run_quietly "mkdir -p ${CURRENT_RELEASE_APP_PATH}/vendor/"
+run_quietly "ln -nfs ${SHARED_APP_PATH}/bundle/ ${CURRENT_RELEASE_APP_PATH}/vendor/bundle"
+run_quietly "[ -d $RBENV_PATH ] && export PATH=\"$RBENV_PATH/bin:$PATH\" && eval \"\$(rbenv init - sh)\" && rbenv rehash"
+log "ruby version : `ruby -v`"
+
+
+# dependencies
+log "Installing dependencies using `bundle --version`"
+run_quietly "unset GIT_DIR"
+#run "bundle install --deployment --without development test"
+run "bundle install --without development:test --path vendor/bundle --binstubs bin/ --deployment"
+
+
+# database
+log "Migrating database"
+run "bundle exec rake db:migrate"
+
+log "Successfully deployed application to ${CURRENT_RELEASE_APP_PATH}"
+
+log "Linking as current"
+mv -f ${CURRENT_APP_PATH} ${CURRENT_APP_PATH}_old 2> /dev/null
+run_quietly "ln -nfs ${CURRENT_RELEASE_APP_PATH} ${CURRENT_APP_PATH}"
+
+log "Preparing application"
+run "bundle exec rake assets:precompile"
+
+
+log "Restarting application"
+#mkdir -p tmp/
+#touch tmp/restart.txt
+
+
