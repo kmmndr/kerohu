@@ -2,15 +2,14 @@
 
 CURRENT_GIT_DIR=`pwd`
 APP_NAME=`basename $CURRENT_GIT_DIR .git`
-#APP_NAME="piktur_gallery"
 APP_PATH=$HOME/apps/${APP_NAME}
-RELEASES_APP_PATH=$HOME/${APP_NAME}/releases
 NOW=`date +%Y%m%d%H%M`
 RBENV_PATH=$HOME/.rbenv
 
+RELEASES_APP_PATH=${APP_PATH}/releases
 CURRENT_RELEASE_APP_PATH=$RELEASES_APP_PATH/$NOW
-CURRENT_APP_PATH=$HOME/${APP_NAME}/current
-SHARED_APP_PATH=$HOME/${APP_NAME}/shared
+CURRENT_APP_PATH=${APP_PATH}/current
+SHARED_APP_PATH=${APP_PATH}/shared
 
 
 # Production environment
