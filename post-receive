@@ -17,7 +17,7 @@ export RAILS_ENV="production"
 
 PID=$$
 echo "PID : $PID"
-renice -19 -p $$
+renice 19 -p $$
 
 run_quietly() {
   eval $1 || exit_with_error $1
