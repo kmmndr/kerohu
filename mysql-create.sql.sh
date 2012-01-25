@@ -3,8 +3,23 @@
 USER=$1
 PASS=$USER
 DB=$USER
+error=0
 
 if [ "aa$USER" == "aa" ]; then
+  error=1
+fi
+
+case $DB in
+"information_schema")
+  error=1
+  ;;
+"mysql")
+  error=1
+  ;;
+*) ;;
+esac
+
+if [ $error -eq 1 ]; then
   exit
 fi
 
