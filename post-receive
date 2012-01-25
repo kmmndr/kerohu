@@ -73,6 +73,7 @@ run "bundle exec rake db:migrate"
 log "Successfully deployed application to ${CURRENT_RELEASE_APP_PATH}"
 
 log "Linking as current"
+rm -f ${CURRENT_APP_PATH}_old 2> /dev/null
 mv -f ${CURRENT_APP_PATH} ${CURRENT_APP_PATH}_old 2> /dev/null
 run_quietly "ln -nfs ${CURRENT_RELEASE_APP_PATH} ${CURRENT_APP_PATH}"
 
