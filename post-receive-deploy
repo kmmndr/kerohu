@@ -1,5 +1,9 @@
 #!/bin/sh
 
+#branch=$(git rev-parse --symbolic --abbrev-ref $1)
+#echo "Update pushed to branch $branch"
+
+
 CURRENT_GIT_DIR=`pwd`
 APP_NAME=`basename $CURRENT_GIT_DIR .git`
 APP_PATH=$HOME/apps/${APP_NAME}
@@ -9,6 +13,7 @@ RBENV_PATH=$HOME/.rbenv
 RELEASES_APP_PATH=${APP_PATH}/releases
 CURRENT_RELEASE_APP_PATH=$RELEASES_APP_PATH/$NOW
 CURRENT_APP_PATH=${APP_PATH}/current
+OLD_CURRENT_APP_PATH=${APP_PATH}/current_old
 SHARED_APP_PATH=${APP_PATH}/shared
 
 
@@ -72,16 +77,19 @@ run "bundle exec rake db:migrate"
 
 log "Successfully deployed application to ${CURRENT_RELEASE_APP_PATH}"
 
-log "Linking as current"
-rm -f ${CURRENT_APP_PATH}_old 2> /dev/null
-mv -f ${CURRENT_APP_PATH} ${CURRENT_APP_PATH}_old 2> /dev/null
-run_quietly "ln -nfs ${CURRENT_RELEASE_APP_PATH} ${CURRENT_APP_PATH}"
-
 log "Preparing application"
 run "bundle exec rake assets:precompile"
 
+log "Linking as current"
+rm -f ${OLD_CURRENT_APP_PATH} 2> /dev/null
+mv -f ${CURRENT_APP_PATH} ${OLD_CURRENT_APP_PATH} 2> /dev/null
+run_quietly "ln -nfs ${CURRENT_RELEASE_APP_PATH} ${CURRENT_APP_PATH}"
+
 
 log "Restarting application"
+#bin/unicorn -E production -c config/unicorn.rb config.ru
+${OLD_CURRENT_APP_PATH}/bin/god terminate
+${CURRENT_APP_PATH}/bin/god -c ${CURRENT_APP_PATH}/config/unicorn.god
 #mkdir -p tmp/
 #touch tmp/restart.txt
 
