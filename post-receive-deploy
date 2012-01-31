@@ -1,8 +1,13 @@
 #!/bin/sh
 
-#branch=$(git rev-parse --symbolic --abbrev-ref $1)
-#echo "Update pushed to branch $branch"
-
+if ! [ -t 0 ]; then
+  read -a ref
+fi
+IFS='/' read -ra REF <<< "${ref[2]}"
+branch="${REF[2]}"
+if [ "master" != "$branch" ]; then
+  exit
+fi
 
 CURRENT_GIT_DIR=`pwd`
 APP_NAME=`basename $CURRENT_GIT_DIR .git`
@@ -46,8 +51,7 @@ log "receiving push"
 run_quietly "mkdir -p ${CURRENT_RELEASE_APP_PATH}"
 run_quietly "GIT_WORK_TREE=$CURRENT_RELEASE_APP_PATH git checkout -f"
 
-log "Ruby/Rails app detected\n
- Application name $APP_NAME"
+log "Ruby/Rails app detected (Application name $APP_NAME)"
 run_quietly "cd ${CURRENT_RELEASE_APP_PATH}"
 run_quietly "mkdir -p ${CURRENT_RELEASE_APP_PATH}/vendor/"
 run_quietly "mkdir -p ${SHARED_APP_PATH}/log/"
