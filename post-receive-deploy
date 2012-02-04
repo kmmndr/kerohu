@@ -6,6 +6,7 @@ fi
 IFS='/' read -ra REF <<< "${ref[2]}"
 branch="${REF[2]}"
 if [ "master" != "$branch" ]; then
+  echo "pushed into branch $branch. Done"
   exit
 fi
 
