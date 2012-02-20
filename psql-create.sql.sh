@@ -10,10 +10,13 @@ if [ "aa$USER" == "aa" ]; then
 fi
 
 case $DB in
-"information_schema")
+"postgres")
   error=1
   ;;
-"mysql")
+"template0")
+  error=1
+  ;;
+"template1")
   error=1
   ;;
 *) ;;
@@ -24,11 +27,11 @@ if [ $error -eq 1 ]; then
 fi
 
 cat << EOF
+-- allowing to connect
+create user $USER with password '$PASS';
 -- creating database
 create database $DB;
--- allowing to connect
-grant usage on *.* to $USER@localhost identified by '$PASS';
 -- allowing to perform everything on the new database
-grant all privileges on $DB.* to $USER@localhost;
+grant all privileges on database $DB to $USER;
 EOF
 
