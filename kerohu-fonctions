@@ -1,0 +1,60 @@
+#!/bin/bash
+
+run_quietly() {
+  eval $1 || exit_with_error $1
+}
+
+run() {
+  echo "running : $1"
+  run_quietly "$1"
+}
+
+log() {
+  echo "-----> $*"
+}
+
+exit_with_error() {
+  log "An error has occurred, stopping\nInvoked command : $1"
+  exit 1
+}
+
+if ! [ -t 0 ]; then
+  read -a ref
+fi
+IFS='/' read -ra REF <<< "${ref[2]}"
+export CURRENT_GIT_BRANCH="${REF[2]}"
+
+
+#if [ "master" != "$branch" ]; then
+#  echo "pushed into branch $branch. Done"
+#  exit
+#fi
+
+export CURRENT_GIT_DIR=`pwd`
+export APP_NAME=`basename $CURRENT_GIT_DIR .git`
+export APP_PATH=$HOME/apps/${APP_NAME}
+export NOW=`date +%Y%m%d%H%M`
+
+export RELEASES_APP_PATH=${APP_PATH}/releases
+export CURRENT_RELEASE_APP_PATH=$RELEASES_APP_PATH/$NOW
+export CURRENT_APP_PATH=${APP_PATH}/current
+export OLD_CURRENT_APP_PATH=${APP_PATH}/current_old
+export SHARED_APP_PATH=${APP_PATH}/shared
+
+
+#if [[ ! $RBENV_PATH ]]; then
+#  RBENV_PATH=$HOME/.rbenv
+#fi
+
+#kerohu_install_hook() {
+#  cat << EOF
+##!/bin/bash
+#KEROHU_PATH="/home/app/kerohu"
+#echo "KEROHU_PATH : $KEROHU_PATH"
+#echo "loading functions"
+#. \$KEROHU_PATH/kerohu-fonctions
+#echo "running post-receive"
+#. \$KEROHU_PATH/post-receive-deploy
+#EOF
+#}
+

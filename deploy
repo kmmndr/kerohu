@@ -1,0 +1,26 @@
+#!/bin/sh
+
+if [ "master" != "$CURRENT_GIT_BRANCH" ]; then
+  echo "pushed into branch $CURRENT_GIT_BRANCH. Done"
+  exit
+fi
+
+# deploy
+PID=$$
+log "Renice process ($PID)"
+run_quietly "renice 19 -p $PID"
+
+log "receiving push"
+run_quietly "mkdir -p ${CURRENT_RELEASE_APP_PATH}"
+run_quietly "GIT_WORK_TREE=$CURRENT_RELEASE_APP_PATH git checkout -f"
+
+
+# dumb rails detection
+if [ -f $CURRENT_RELEASE_APP_PATH/config.ru ]; then
+  # deploy-rails
+  log "Ruby/Rails app detected (Application name $APP_NAME)"
+  . $KEROHU_PATH/deploy-rails
+fi
+
+exit
+

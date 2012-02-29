@@ -1,63 +1,17 @@
 #!/bin/sh
 
-if ! [ -t 0 ]; then
-  read -a ref
-fi
-IFS='/' read -ra REF <<< "${ref[2]}"
-branch="${REF[2]}"
-if [ "master" != "$branch" ]; then
-  echo "pushed into branch $branch. Done"
-  exit
-fi
-
-CURRENT_GIT_DIR=`pwd`
-APP_NAME=`basename $CURRENT_GIT_DIR .git`
-APP_PATH=$HOME/apps/${APP_NAME}
-NOW=`date +%Y%m%d%H%M`
-RBENV_PATH=$HOME/.rbenv
-
-RELEASES_APP_PATH=${APP_PATH}/releases
-CURRENT_RELEASE_APP_PATH=$RELEASES_APP_PATH/$NOW
-CURRENT_APP_PATH=${APP_PATH}/current
-OLD_CURRENT_APP_PATH=${APP_PATH}/current_old
-SHARED_APP_PATH=${APP_PATH}/shared
-
-
 # Production environment
 export RAILS_ENV="production"
+export DATABASE_URL="postgres://$APP_NAME:$APP_NAME@localhost/$APP_NAME"
+ruby $KEROHU_PATH/database.yml.rb > $CURRENT_RELEASE_APP_PATH/config/database.yml
 
-PID=$$
-echo "PID : $PID"
-renice 19 -p $$
-
-run_quietly() {
-  eval $1 || exit_with_error $1
-}
-
-run() {
-  echo "running : $1"
-  run_quietly "$1"
-}
-
-log() {
-  echo "-----> $*"
-}
-
-exit_with_error() {
-  log "An error has occurred, stopping\nInvoked command : $1"
-  exit 1
-}
-
-log "receiving push"
-run_quietly "mkdir -p ${CURRENT_RELEASE_APP_PATH}"
-run_quietly "GIT_WORK_TREE=$CURRENT_RELEASE_APP_PATH git checkout -f"
-
-log "Ruby/Rails app detected (Application name $APP_NAME)"
 run_quietly "cd ${CURRENT_RELEASE_APP_PATH}"
 run_quietly "mkdir -p ${CURRENT_RELEASE_APP_PATH}/vendor/"
 run_quietly "mkdir -p ${SHARED_APP_PATH}/log/"
 run_quietly "mkdir -p ${SHARED_APP_PATH}/tmp/pids/"
 run_quietly "mkdir -p ${SHARED_APP_PATH}/bundle/"
+run_quietly "mkdir -p ${SHARED_APP_PATH}/data/"
+run_quietly "ln -nfs ${SHARED_APP_PATH}/data/ ${CURRENT_RELEASE_APP_PATH}/public/data"
 #ln -nfs ${SHARED_APP_PATH}/config/database.yml ${CURRENT_RELEASE_APP_PATH}/config/database.yml || exit_with_error
 run_quietly "rm -rf ${CURRENT_RELEASE_APP_PATH}/log"
 run_quietly "ln -nfs ${SHARED_APP_PATH}/log/ ${CURRENT_RELEASE_APP_PATH}/log"
@@ -65,6 +19,8 @@ run_quietly "mkdir -p ${CURRENT_RELEASE_APP_PATH}/tmp/"
 run_quietly "ln -nfs ${SHARED_APP_PATH}/tmp/pids/ ${CURRENT_RELEASE_APP_PATH}/tmp/pids"
 run_quietly "mkdir -p ${CURRENT_RELEASE_APP_PATH}/vendor/"
 run_quietly "ln -nfs ${SHARED_APP_PATH}/bundle/ ${CURRENT_RELEASE_APP_PATH}/vendor/bundle"
+
+# init rbenv
 run_quietly "[ -d $RBENV_PATH ] && export PATH=\"$RBENV_PATH/bin:$PATH\" && eval \"\$(rbenv init - sh)\" && rbenv rehash"
 log "ruby version : `ruby -v`"
 
@@ -77,8 +33,12 @@ run "bundle install --without development:test --path vendor/bundle --binstubs b
 
 
 # database
-log "Migrating database"
-run "bundle exec rake db:migrate"
+if [[ $DEPLOY_MIGRATE ]]; then
+  log "Migrating database"
+  run "bundle exec rake db:migrate"
+else
+  log "No database migration in production"
+fi
 
 log "Successfully deployed application to ${CURRENT_RELEASE_APP_PATH}"
 
