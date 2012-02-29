@@ -7,14 +7,15 @@ ruby $KEROHU_PATH/database.yml.rb > $CURRENT_RELEASE_APP_PATH/config/database.ym
 
 run_quietly "cd ${CURRENT_RELEASE_APP_PATH}"
 run_quietly "mkdir -p ${CURRENT_RELEASE_APP_PATH}/vendor/"
-run_quietly "mkdir -p ${SHARED_APP_PATH}/log/"
+SHARED_LOG_PATH="${SHARED_APP_PATH}/log/"
+run_quietly "mkdir -p ${SHARED_LOG_PATH}"
 run_quietly "mkdir -p ${SHARED_APP_PATH}/tmp/pids/"
 run_quietly "mkdir -p ${SHARED_APP_PATH}/bundle/"
 run_quietly "mkdir -p ${SHARED_APP_PATH}/data/"
 run_quietly "ln -nfs ${SHARED_APP_PATH}/data/ ${CURRENT_RELEASE_APP_PATH}/public/data"
 #ln -nfs ${SHARED_APP_PATH}/config/database.yml ${CURRENT_RELEASE_APP_PATH}/config/database.yml || exit_with_error
 run_quietly "rm -rf ${CURRENT_RELEASE_APP_PATH}/log"
-run_quietly "ln -nfs ${SHARED_APP_PATH}/log/ ${CURRENT_RELEASE_APP_PATH}/log"
+run_quietly "ln -nfs ${SHARED_LOG_PATH} ${CURRENT_RELEASE_APP_PATH}/log"
 run_quietly "mkdir -p ${CURRENT_RELEASE_APP_PATH}/tmp/"
 run_quietly "ln -nfs ${SHARED_APP_PATH}/tmp/pids/ ${CURRENT_RELEASE_APP_PATH}/tmp/pids"
 run_quietly "mkdir -p ${CURRENT_RELEASE_APP_PATH}/vendor/"
@@ -53,8 +54,10 @@ run_quietly "ln -nfs ${CURRENT_RELEASE_APP_PATH} ${CURRENT_APP_PATH}"
 
 log "Restarting application"
 #bin/unicorn -E production -c config/unicorn.rb config.ru
-${OLD_CURRENT_APP_PATH}/bin/god terminate
-${CURRENT_APP_PATH}/bin/god -c ${CURRENT_APP_PATH}/config/unicorn.god
+#${OLD_CURRENT_APP_PATH}/bin/god terminate
+#${CURRENT_APP_PATH}/bin/god -c ${CURRENT_APP_PATH}/config/unicorn.god
+#     bundle exec foreman export bluepill /tmp -u app -l ~/work/fourmi2/log
+bundle exec foreman export bluepill $CURRENT_APP_PATH -u $USER -l $SHARED_LOG_PATH -d $CURRENT_APP_PATH -a $APP_NAME
 #mkdir -p tmp/
 #touch tmp/restart.txt
 

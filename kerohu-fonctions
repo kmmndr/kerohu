@@ -30,6 +30,7 @@ export CURRENT_GIT_BRANCH="${REF[2]}"
 #  exit
 #fi
 
+export USER=`id -nu`
 export CURRENT_GIT_DIR=`pwd`
 export APP_NAME=`basename $CURRENT_GIT_DIR .git`
 export APP_PATH=$HOME/apps/${APP_NAME}
