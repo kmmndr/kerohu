@@ -58,10 +58,21 @@ log "Restarting application"
 #${CURRENT_APP_PATH}/bin/god -c ${CURRENT_APP_PATH}/config/unicorn.god
 #     bundle exec foreman export bluepill /tmp -u app -l ~/work/fourmi2/log
 #bundle exec foreman export bluepill $CURRENT_APP_PATH -u $USER -l $SHARED_LOG_PATH -d $CURRENT_APP_PATH -a $APP_NAME
-bluepill --no-privileged stop $APP_NAME
-foreman export bluepill $CURRENT_APP_PATH -u $USER -l $SHARED_LOG_PATH -d $CURRENT_APP_PATH -a $APP_NAME
-bluepill --no-privileged load $CURRENT_APP_PATH/$APP_NAME.pill
-#mkdir -p tmp/
-#touch tmp/restart.txt
+bluepill_conf="$APP_PATH/$APP_NAME.pill"
+if [ -f $bluepill_conf ]; then
+  # config file exists
+  error=0
+  bluepill $APP_NAME stop --no-privileged 2> /dev/null || error=1
+  if [ $error -eq 1 ]; then
+    bluepill load $APP_PATH/$APP_NAME.pill --no-privileged
+  else
+    bluepill $APP_NAME start --no-privileged
+  fi
+else
+  # config file do not exists, exporting from foreman
+  foreman export bluepill $APP_PATH -u $USER -l $SHARED_LOG_PATH -d $CURRENT_APP_PATH -a $APP_NAME
+  # start
+  bluepill load $APP_PATH/$APP_NAME.pill --no-privileged
+fi
 
 
