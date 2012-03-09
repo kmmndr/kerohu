@@ -8,7 +8,7 @@ echo "RBENV_PATH : $RBENV_PATH"
 
 # checking kerohu
 if [[ ! $KEROHU_PATH ]]; then
-  KEROHU_PATH="$HOME/kerohu"
+  KEROHU_PATH="$HOME/.kerohu"
 fi
 echo "KEROHU_PATH : $KEROHU_PATH"
 
