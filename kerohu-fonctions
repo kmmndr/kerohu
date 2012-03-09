@@ -33,14 +33,6 @@ export CURRENT_GIT_BRANCH="${REF[2]}"
 export USER=`id -nu`
 export CURRENT_GIT_DIR=`pwd`
 export APP_NAME=`basename $CURRENT_GIT_DIR .git`
-export APP_PATH=$HOME/apps/${APP_NAME}
-export NOW=`date +%Y%m%d%H%M`
-
-export RELEASES_APP_PATH=${APP_PATH}/releases
-export CURRENT_RELEASE_APP_PATH=$RELEASES_APP_PATH/$NOW
-export CURRENT_APP_PATH=${APP_PATH}/current
-export OLD_CURRENT_APP_PATH=${APP_PATH}/current_old
-export SHARED_APP_PATH=${APP_PATH}/shared
 
 
 #if [[ ! $RBENV_PATH ]]; then

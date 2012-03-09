@@ -1,11 +1,51 @@
 #!/bin/sh
 
-if [ "master" != "$CURRENT_GIT_BRANCH" ]; then
-  echo "pushed into branch $CURRENT_GIT_BRANCH. Done"
+DEPLOY_BRANCH=$1
+DEPLOY_PATH=$2
+
+echo "pushed into branch $CURRENT_GIT_BRANCH"
+
+# no params, stopping here
+if [ $# -eq 0 ]; then
+  echo "Done."
+  exit
+fi
+
+# checking CURRENT_GIT_BRANCH
+if [ "aa$CURRENT_GIT_BRANCH" == "aa" ]; then
+  echo "ERROR : CURRENT_GIT_BRANCH not set"
+  exit
+fi
+
+# checking DEPLOY_BRANCH
+if [ "aa$DEPLOY_BRANCH" == "aa" ]; then
+  echo "DEPLOY_BRANCH not set"
+  exit
+fi
+
+# checking DEPLOY_PATH
+if [ "aa$DEPLOY_PATH" == "aa" ]; then
+  echo "DEPLOY_PATH not set"
+  exit
+fi
+
+if [ "$DEPLOY_BRANCH" != "$CURRENT_GIT_BRANCH" ]; then
+  echo "deploy branch set to $DEPLOY_BRANCH"
   exit
 fi
 
 # deploy
+
+#export APP_PATH=$HOME/apps/${APP_NAME}
+export APP_PATH=${DEPLOY_PATH}/${APP_NAME}
+export NOW=`date +%Y%m%d%H%M`
+
+export RELEASES_APP_PATH=${APP_PATH}/releases
+export CURRENT_RELEASE_APP_PATH=$RELEASES_APP_PATH/$NOW
+export CURRENT_APP_PATH=${APP_PATH}/current
+export OLD_CURRENT_APP_PATH=${APP_PATH}/current_old
+export SHARED_APP_PATH=${APP_PATH}/shared
+
 PID=$$
 log "Renice process ($PID)"
 run_quietly "renice 19 -p $PID"

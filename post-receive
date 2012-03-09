@@ -1,17 +1,18 @@
 #!/bin/bash
 
+# checking rbenv
 if [[ ! $RBENV_PATH ]]; then
   RBENV_PATH="$HOME/.rbenv"
 fi
+echo "RBENV_PATH : $RBENV_PATH"
 
+# checking kerohu
 if [[ ! $KEROHU_PATH ]]; then
   KEROHU_PATH="$HOME/kerohu"
 fi
-
-echo "RBENV_PATH : $RBENV_PATH"
 echo "KEROHU_PATH : $KEROHU_PATH"
 
 echo "loading functions"
 . $KEROHU_PATH/kerohu-fonctions
 echo "running post-receive"
-. $KEROHU_PATH/deploy
+. $KEROHU_PATH/deploy master "$HOME/apps"

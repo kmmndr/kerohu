@@ -3,7 +3,6 @@
 # Production environment
 export RAILS_ENV="production"
 export DATABASE_URL="postgres://$APP_NAME:$APP_NAME@localhost/$APP_NAME"
-ruby $KEROHU_PATH/database.yml.rb > $CURRENT_RELEASE_APP_PATH/config/database.yml
 
 run_quietly "cd ${CURRENT_RELEASE_APP_PATH}"
 run_quietly "mkdir -p ${CURRENT_RELEASE_APP_PATH}/vendor/"
@@ -25,6 +24,8 @@ run_quietly "ln -nfs ${SHARED_APP_PATH}/bundle/ ${CURRENT_RELEASE_APP_PATH}/vend
 run_quietly "[ -d $RBENV_PATH ] && export PATH=\"$RBENV_PATH/bin:$PATH\" && eval \"\$(rbenv init - sh)\" && rbenv rehash"
 log "ruby version : `ruby -v`"
 
+# force database.yml
+run_quietly "ruby $KEROHU_PATH/database.yml.rb > $CURRENT_RELEASE_APP_PATH/config/database.yml"
 
 # dependencies
 log "Installing dependencies using `bundle --version`"
