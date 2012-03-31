@@ -8,13 +8,13 @@ unless dbstr.nil?
   value_arr = dbstr.match(/([a-z]*):\/\/(.*):(.*)@(.*)\/(.*)/i)
   unless value_arr.nil?                                                                                                                      
     db_arr = {}
-    db_arr['type'] = value_arr[1]
-    db_arr['user'] = value_arr[2]
-    db_arr['pass'] = value_arr[3]
+    db_type = value_arr[1]
+    db_arr['username'] = value_arr[2]
+    db_arr['password'] = value_arr[3]
     db_arr['host'] = value_arr[4]
-    db_arr['name'] = value_arr[5]
+    db_arr['database'] = value_arr[5]
 
-    case db_arr['type'].downcase
+    case db_type.downcase
     when "postgres"
       db_arr['adapter'] = "postgresql"
       db_arr['encoding'] = "unicode"
