@@ -7,37 +7,27 @@ dbstr = ENV['DATABASE_URL']
 unless dbstr.nil?
   value_arr = dbstr.match(/([a-z]*):\/\/(.*):(.*)@(.*)\/(.*)/i)
   unless value_arr.nil?                                                                                                                      
-    db_type = value_arr[1]
-    db_user = value_arr[2]
-    db_pass = value_arr[3]
-    db_host = value_arr[4]
-    db_name = value_arr[5]
-    db_encoding = ""
-    db_port = ""
+    db_arr = {}
+    db_arr['type'] = value_arr[1]
+    db_arr['user'] = value_arr[2]
+    db_arr['pass'] = value_arr[3]
+    db_arr['host'] = value_arr[4]
+    db_arr['name'] = value_arr[5]
 
-    case db_type.downcase
+    case db_arr['type'].downcase
     when "postgres"
-      db_adapter = "postgresql"
-      db_encoding = "unicode"
-      db_port = 5432
+      db_arr['adapter'] = "postgresql"
+      db_arr['encoding'] = "unicode"
+      db_arr['port'] = 5432
     when "mysql"
-      db_adapter = "mysql2"
-      db_encoding = ""
-      db_port = 3306
+      db_arr['adapter'] = "mysql2"
+      db_arr['port'] = 3306
     else
       # do nothing
     end
 
     db_hash = {
-      'production' => {
-        'encoding' => db_encoding,
-        'adapter'  => db_adapter,
-        'username' => db_user,
-        'password' => db_pass,
-        'database' => db_name,
-        'host'     => db_host,
-        'port'     => db_port
-      }
+      'production' => db_arr
     }
     puts "### DATABASE_URL=#{dbstr}"
     puts db_hash.to_yaml.to_s
